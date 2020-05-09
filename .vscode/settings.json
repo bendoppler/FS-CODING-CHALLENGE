@@ -5,6 +5,20 @@
         "deque": "cpp",
         "list": "cpp",
         "vector": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "__node_handle": "cpp",
+        "array": "cpp",
+        "filesystem": "cpp",
+        "forward_list": "cpp",
+        "iterator": "cpp",
+        "map": "cpp",
+        "queue": "cpp",
+        "regex": "cpp",
+        "set": "cpp",
+        "stack": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp"
     }
 }
