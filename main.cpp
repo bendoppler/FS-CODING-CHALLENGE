@@ -51,7 +51,7 @@ void readFile(string filename) {
     }
 }
 
-int manhattanDistance(pair<int,int>& p1, pair<int,int>& p2) {
+int manhattanDistance(const pair<int,int>& p1,const pair<int,int>& p2) {
     return abs(p1.first-p2.first) + abs(p1.second-p2.second);
 }
 
@@ -227,10 +227,53 @@ void findRegion(pair<int,int>& station) {
     }
 }
 
+class SuperRegion {
+public:
+    vector<region::iterator> regions;
+    void insert(region::iterator it) {
+        regions.emplace_back(it);
+    }
+    int getSize() {
+        int size = 0;
+        for(int i = 0; i < regions.size(); ++i) {
+            size += regions[i]->second.size();
+        }
+        return size;
+    }
+};
+
 int main() {
     readFile("test.txt");
     for(pair<int,int>& station: gasStations) {
         findRegion(station);
+    }
+    vector<SuperRegion> superRegions;
+    int idx = 0;
+    for(auto it1 = regions.begin(); it1 != regions.end(); ++it1) {
+        for(auto it2 = next(it1); it2 != regions.end(); ++it2) {
+            if(manhattanDistance(it1->first, it2->first) <= gasVolume) {
+                if(idx == superRegions.size()) {
+                    SuperRegion spRegion;
+                    spRegion.insert(it2);
+                    superRegions.emplace_back(spRegion);
+                }else {
+                    superRegions[idx].insert(it2);
+                }
+            }
+        }
+        if(idx == superRegions.size()) {
+            SuperRegion spRegion;
+            spRegion.insert(it1);
+            superRegions.emplace_back(spRegion);
+        }else {
+            superRegions[idx].insert(it1);
+        }
+    }
+    SuperRegion maxRegion = superRegions[0];
+    for(int i = 1; i < superRegions.size(); ++i) {
+        if(maxRegion.getSize() < superRegions[i].getSize()) {
+            maxRegion = superRegions[i];
+        }
     }
     return 0;
 }
