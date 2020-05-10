@@ -150,6 +150,7 @@ private:
 bool isValid(int x, int y, set<pair<int,int>>& visited) {
     return x >= 0 && x < rows && y >= 0 && y < columns && !visited.count(make_pair(x,y)) && maps[x][y] != 0;
 }
+
 vector<pair<int,int>> aStarSearch(const pair<int,int>& start, const pair<int,int>& end, bool isStation) {
     Node* node = new Node(nullptr, start, 0, manhattanDistance(start, end));
     BinaryHeap heap(1000);
@@ -207,6 +208,7 @@ vector<pair<int,int>> aStarSearch(const pair<int,int>& start, const pair<int,int
         return res.size()-1 <= gasVolume/2 ? res : vector<pair<int,int>>{};
     return res.size()-1 <= gasVolume ? res : vector<pair<int,int>>{};
 }
+
 void findRegion(pair<int,int>& station) {
     vector<pair<int,int>> potentialStars;
     for(pair<int,int>& star: stars) {
@@ -295,6 +297,79 @@ void dfs(vector<pair<int,int>>& candidate, map<pair<int,int>, bool>& visited, pa
         }
     }
 }
+
+bool canReach(const pair<int, int>& position) {
+	return position.first >= 0 && position.first < rows && position.second >= 0 && position.second < columns && maps[position.first][position.second] != 0;
+}
+
+bool isStar(const pair<int, int>& position) {
+	return maps[position.first][position.second] == 2;
+}
+
+class PathWithMaxStars {
+	vector<pair<int, int>> currentPath;
+	int maxStars = 0, currentStars = 0;
+
+	void dfsMaxStars(vector<pair<int, int>>& path, const pair<int, int>& currentPosition) {
+		--gasVolume;
+		currentPath.push_back(currentPosition);
+
+		if (isStar(currentPosition)) {
+			++currentStars;
+
+			if (currentStars > maxStars || (currentStars == maxStars && currentPath.size() < path.size())) {
+				maxStars = currentStars;
+				path = currentPath;
+			}
+		}
+
+		if (gasVolume > 0) {
+			pair<int, int> position = {currentPosition.first - 1, currentPosition.second};
+			if (canReach(position))
+				dfsMaxStars(path, position);
+
+			position = {currentPosition.first, currentPosition.second + 1};
+			if (canReach(position))
+				dfsMaxStars(path, position);
+
+			position = {currentPosition.first + 1, currentPosition.second};
+			if (canReach(position))
+				dfsMaxStars(path, position);
+
+			position = {currentPosition.first, currentPosition.second - 1};
+			if (canReach(position))
+				dfsMaxStars(path, position);
+		}
+
+		if (isStar(currentPosition))
+			--currentStars;
+
+		currentPath.pop_back();
+		++gasVolume;
+	}
+
+public:
+	void getPath(vector<pair<int, int>>& path) {
+		currentPath = {tankStartPosition};
+		
+		pair<int, int> position = {tankStartPosition.first - 1, tankStartPosition.second};
+		if (canReach(position))
+			dfsMaxStars(path, position);
+
+		position = {tankStartPosition.first, tankStartPosition.second + 1};
+		if (canReach(position))
+			dfsMaxStars(path, position);
+
+		position = {tankStartPosition.first + 1, tankStartPosition.second};
+		if (canReach(position))
+			dfsMaxStars(path, position);
+
+		position = {tankStartPosition.first, tankStartPosition.second - 1};
+		if (canReach(position))
+			dfsMaxStars(path, position);
+	}
+};
+
 int main() {
     readFile("test_1.txt");
     for(pair<int,int>& station: gasStations) {
@@ -384,7 +459,7 @@ int main() {
             }
         }
     }
-    cout<<maxStars<<endl;
+    cout << maxStars << endl;
     fout.open("path.txt");
     pair<int,int> pre{-1,-1};
     for(auto& point: res) {
