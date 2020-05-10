@@ -303,72 +303,62 @@ bool canReach(const pair<int, int>& position) {
 }
 
 bool isStar(const pair<int, int>& position) {
-	return maps[position.first][position.second] == 2;
+	return maps[position.first][position.second] == 3;
 }
 
-class PathWithMaxStars {
-	vector<pair<int, int>> currentPath;
-	int maxStars = 0, currentStars = 0;
+vector<pair<int, int>> currentPath;
+int maxStars = 0, currentStars = 0;
+void pathWithMaxStarsWithoutReachGasStation(vector<pair<int, int>>& path, set<pair<int, int>>& visited, const pair<int, int>& currentPosition) {
+    currentPath.push_back(currentPosition);
+    visited.insert(currentPosition);
 
-	void dfsMaxStars(vector<pair<int, int>>& path, const pair<int, int>& currentPosition) {
-		--gasVolume;
-		currentPath.push_back(currentPosition);
+    if (isStar(currentPosition)) {
+        ++currentStars;
 
-		if (isStar(currentPosition)) {
-			++currentStars;
+        if (currentStars > maxStars || (currentStars == maxStars && currentPath.size() < path.size())) {
+            maxStars = currentStars;
+            path = currentPath;
+        }
+    }
 
-			if (currentStars > maxStars || (currentStars == maxStars && currentPath.size() < path.size())) {
-				maxStars = currentStars;
-				path = currentPath;
-			}
-		}
+    if (gasVolume > 1) {
+        pair<int, int> position = {currentPosition.first - 1, currentPosition.second};
+        if (canReach(position)) {
+            --gasVolume;
+            pathWithMaxStarsWithoutReachGasStation(path, visited, position);
+            ++gasVolume;
+        } 
 
-		if (gasVolume > 0) {
-			pair<int, int> position = {currentPosition.first - 1, currentPosition.second};
-			if (canReach(position))
-				dfsMaxStars(path, position);
+        position = {currentPosition.first, currentPosition.second + 1};
+        if (canReach(position)) {
+            --gasVolume;
+            pathWithMaxStarsWithoutReachGasStation(path, visited, position);
+            ++gasVolume;
+        }
 
-			position = {currentPosition.first, currentPosition.second + 1};
-			if (canReach(position))
-				dfsMaxStars(path, position);
+        position = {currentPosition.first + 1, currentPosition.second};
+        if (canReach(position)) {
+            --gasVolume;
+            pathWithMaxStarsWithoutReachGasStation(path, visited, position);
+            ++gasVolume;
+        }
 
-			position = {currentPosition.first + 1, currentPosition.second};
-			if (canReach(position))
-				dfsMaxStars(path, position);
+        position = {currentPosition.first, currentPosition.second - 1};
+        if (canReach(position)) {
+            --gasVolume;
+            pathWithMaxStarsWithoutReachGasStation(path, visited, position);
+            ++gasVolume;
+        }
 
-			position = {currentPosition.first, currentPosition.second - 1};
-			if (canReach(position))
-				dfsMaxStars(path, position);
-		}
+        
+    }
 
-		if (isStar(currentPosition))
-			--currentStars;
+    if (isStar(currentPosition))
+        --currentStars;
 
-		currentPath.pop_back();
-		++gasVolume;
-	}
-
-public:
-	void getPath(vector<pair<int, int>>& path) {
-		currentPath = {tankStartPosition};
-		
-		pair<int, int> position = {tankStartPosition.first - 1, tankStartPosition.second};
-		if (canReach(position))
-			dfsMaxStars(path, position);
-
-		position = {tankStartPosition.first, tankStartPosition.second + 1};
-		if (canReach(position))
-			dfsMaxStars(path, position);
-
-		position = {tankStartPosition.first + 1, tankStartPosition.second};
-		if (canReach(position))
-			dfsMaxStars(path, position);
-
-		position = {tankStartPosition.first, tankStartPosition.second - 1};
-		if (canReach(position))
-			dfsMaxStars(path, position);
-	}
-};
+    visited.erase(currentPosition);
+    currentPath.pop_back();
+}
 
 int main() {
     readFile("test_1.txt");
@@ -468,5 +458,4 @@ int main() {
         pre = point;
     }
     fout.close();
-    return 0;
 }
